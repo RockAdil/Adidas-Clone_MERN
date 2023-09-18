@@ -3,7 +3,9 @@
 @tailwind utilities;
 
 input[type='text'],
-input[type='password'] {
+input[type='password'],
+input[type='number'],
+textarea {
   @apply bg-gray-100 w-full border my-1 px-3 py-2 rounded-lg;
 }
 

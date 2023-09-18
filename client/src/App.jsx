@@ -23,6 +23,7 @@ const App = () => {
           <Route path='/account' element={<ProfilePage />} />
           <Route path='/account/store' element={<ProductsPage />} />
           <Route path='/account/store/new' element={<FormPage />} />
+          <Route path='/account/store/:id' element={<FormPage />} />
         </Route>
       </Routes>
     </UserContextProvider>

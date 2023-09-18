@@ -6,7 +6,11 @@ require('dotenv').config();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
+const download = require('image-downloader');
+const multer = require('multer');
+const fs = require('fs');
 const User = require('./models/User');
+const Product = require('./models/Product');
 
 const bcryptSalt = bcrypt.genSaltSync(10);
 const jwtSecret = process.env.JWT_SECRET;
@@ -14,6 +18,8 @@ const jwtSecret = process.env.JWT_SECRET;
 app.use(express.json());
 app.use(cors({ credentials: true, origin: 'http://127.0.0.1:5173' }));
 app.use(cookieParser());
+
+app.use('/uploads', express.static(__dirname + '/uploads'));
 
 app.get('/test', (req, res) => {
   res.json('Hello World!');
@@ -83,6 +89,100 @@ app.get('/profile', async (req, res) => {
 // logout
 app.post('/logout', async (req, res) => {
   res.clearCookie('token').json('Logged out');
+});
+
+// Link-Download
+app.post('/upload-by-link', async (req, res) => {
+  const { link } = req.body;
+
+  await download.image({
+    url: link,
+    dest: `${__dirname}/uploads/`,
+  });
+
+  res.json('ok');
+});
+
+// Upload
+const photosMiddleware = multer({ dest: 'uploads' });
+app.post('/upload', photosMiddleware.array('photos', 100), async (req, res) => {
+  const uploadedFiles = [];
+  for (let i = 0; i < req.files.length; i++) {
+    const { path, originalname } = req.files[i];
+    const parts = originalname.split('.');
+    const ext = parts.slice(-1);
+    const newPath = `${path}.${ext}`;
+    fs.renameSync(path, newPath);
+    uploadedFiles.push(newPath.replace('uploads\\', ''));
+  }
+  res.json(uploadedFiles);
+});
+
+// New Product
+app.post('/products', async (req, res) => {
+  const { token } = req.cookies;
+  const { name, address, addPhotos, description, perks, price } = req.body;
+
+  jwt.verify(token, jwtSecret, {}, async (err, userData) => {
+    if (err) throw err;
+    const productDoc = await Product.create({
+      owner: userData.id,
+      name,
+      address,
+      photos: addPhotos,
+      description,
+      perks,
+      price,
+    });
+    res.json(productDoc);
+  });
+});
+
+// User Products
+app.get('/user-products', async (req, res) => {
+  const { token } = req.cookies;
+
+  jwt.verify(token, jwtSecret, {}, async (err, userData) => {
+    if (err) throw err;
+    res.json(await Product.find({ owner: userData.id }));
+  });
+});
+
+// IndexPage Products
+app.get('/products', async (req, res) => {
+  res.json(await Product.find());
+});
+
+// User Product Details
+app.get(`/products/:id`, async (req, res) => {
+  const { id } = req.params;
+  res.json(await Product.findById(id));
+});
+
+// Edit Product
+app.put(`/products/:id`, async (req, res) => {
+  const { id } = req.params;
+  const { token } = req.cookies;
+  const { name, address, addPhotos, description, perks, price } = req.body;
+
+  jwt.verify(token, jwtSecret, {}, async (err, userData) => {
+    if (err) throw err;
+    const productDoc = await Product.findById(id);
+    if (userData.id === productDoc.owner.toString()) {
+      productDoc.set({
+        name,
+        address,
+        photos: addPhotos,
+        description,
+        perks,
+        price,
+      });
+      productDoc.save();
+      res.json('Product Updated');
+    } else {
+      res.json('Not Authorized');
+    }
+  });
 });
 
 app.listen(3000);

@@ -10,10 +10,14 @@ export const RegisterPage = () => {
 
   function handleSubmit(ev) {
     ev.preventDefault();
-    axios.post('/register', { name, email, password }).then(() => {
-      setRedirect(true);
-      alert('You have successfully registered! Please login to continue.');
-    });
+    try {
+      axios.post('/register', { name, email, password }).then(() => {
+        setRedirect(true);
+        alert('You have successfully registered! Please login to continue.');
+      });
+    } catch {
+      alert('Register failed');
+    }
   }
 
   if (redirect) {
