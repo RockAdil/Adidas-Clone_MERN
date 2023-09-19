@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 
 export const IndexPage = () => {
   const [products, setProducts] = useState([]);
@@ -14,13 +15,17 @@ export const IndexPage = () => {
     <div className='grid gap-x-6 gap-y-8 px-8 pb-12  grid-cols-2 md:grid-cols-3 lg:grid-cols-4 mt-12 '>
       {products.length > 0 &&
         products.map((product, index) => (
-          <div key={index} className='bg-gray-100 border shadow-md rounded-md'>
+          <Link
+            to={`/product/${product._id}`}
+            key={index}
+            className='bg-gray-100 border shadow-md rounded-md'
+          >
             <div>
               {product.photos?.[0] && (
                 <img
                   src={`http://127.0.0.1:3000/uploads/${product.photos[0]}`}
                   alt={product.photos[0]}
-                  className='rounded-t-lg'
+                  className='rounded-t-md'
                 />
               )}
             </div>
@@ -57,7 +62,7 @@ export const IndexPage = () => {
                 </span>
               </p>
             </div>
-          </div>
+          </Link>
         ))}
     </div>
   );

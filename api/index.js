@@ -11,6 +11,7 @@ const multer = require('multer');
 const fs = require('fs');
 const User = require('./models/User');
 const Product = require('./models/Product');
+const Purchase = require('./models/Purchase');
 
 const bcryptSalt = bcrypt.genSaltSync(10);
 const jwtSecret = process.env.JWT_SECRET;
@@ -183,6 +184,47 @@ app.put(`/products/:id`, async (req, res) => {
       res.json('Not Authorized');
     }
   });
+});
+
+// Product
+app.get('/product/:id', async (req, res) => {
+  const { id } = req.params;
+  res.json(await Product.findById(id));
+});
+
+// Create Purchase
+app.post('/purchase', async (req, res) => {
+  const { token } = req.cookies;
+  const { quantity, name, phone, price, product } = req.body;
+
+  jwt.verify(token, jwtSecret, {}, async (err, userData) => {
+    if (err) throw err;
+    const purchaseDoc = await Purchase.create({
+      quantity,
+      name,
+      phone,
+      price,
+      product,
+      user: userData.id,
+    });
+    res.json(purchaseDoc);
+  });
+});
+
+// Get All Purchase
+app.get('/purchase', async (req, res) => {
+  const { token } = req.cookies;
+
+  jwt.verify(token, jwtSecret, {}, async (err, userData) => {
+    if (err) throw err;
+    res.json(await Purchase.find({ user: userData.id }).populate('product'));
+  });
+});
+
+// Get Purchase
+app.get('/purchase/:id', async (req, res) => {
+  const { id } = req.params;
+  res.json(await Purchase.findById(id).populate('product'));
 });
 
 app.listen(3000);

@@ -8,6 +8,9 @@ import { UserContextProvider } from './UserContext';
 import { ProfilePage } from './pages/ProfilePage';
 import { ProductsPage } from './pages/ProductsPage';
 import { FormPage } from './pages/FormPage';
+import { ProductPage } from './pages/ProductPage';
+import { OrdersPage } from './pages/OrdersPage';
+import { OrderPage } from './pages/OrderPage';
 
 axios.defaults.baseURL = 'http://127.0.0.1:3000';
 axios.defaults.withCredentials = true;
@@ -24,6 +27,9 @@ const App = () => {
           <Route path='/account/store' element={<ProductsPage />} />
           <Route path='/account/store/new' element={<FormPage />} />
           <Route path='/account/store/:id' element={<FormPage />} />
+          <Route path='/product/:id' element={<ProductPage />} />
+          <Route path='/order' element={<OrdersPage />} />
+          <Route path='/order/:id' element={<OrderPage />} />
         </Route>
       </Routes>
     </UserContextProvider>
