@@ -17,17 +17,22 @@ const bcryptSalt = bcrypt.genSaltSync(10);
 const jwtSecret = process.env.JWT_SECRET;
 
 app.use(express.json());
-app.use(cors({ credentials: true, origin: 'http://127.0.0.1:5173' }));
+app.use(
+  cors({
+    credentials: true,
+    origin: ['https://adidas-adil.vercel.app'],
+    methods: ['GET', 'POST', 'PUT'],
+  })
+);
 app.use(cookieParser());
-
 app.use('/uploads', express.static(__dirname + '/uploads'));
 
-app.get('/test', (req, res) => {
+app.use('/', (req, res) => {
   res.json('Hello World!');
 });
 
 // Moongoose Connection
-Mongoose.connect(process.env.MONGO_URL);
+// Mongoose.connect(process.env.MONGO_URL);
 
 // Register
 app.post('/register', async (req, res) => {

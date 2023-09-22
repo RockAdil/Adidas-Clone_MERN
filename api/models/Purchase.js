@@ -1,5 +1,6 @@
 const Moongoose = require('mongoose');
-const Schema = Moongoose.Schema;
+const { Schema } = Moongoose;
+const { purchasesConnection } = require('../index');
 
 const PurchaseSchema = new Schema({
   quantity: {
@@ -29,6 +30,14 @@ const PurchaseSchema = new Schema({
   },
 });
 
-const PurchaseModel = Moongoose.model('Purchase', PurchaseSchema);
+const purchasesConnection = Moongoose.createConnection(
+  process.env.MONGO_URL_PURCHASES,
+  {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  }
+);
+
+const PurchaseModel = purchasesConnection.model('Purchase', PurchaseSchema);
 
 module.exports = PurchaseModel;
